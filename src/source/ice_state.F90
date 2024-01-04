@@ -71,11 +71,15 @@
          dimension (nx_block,ny_block,ncat,max_blocks), public :: &
          aicen , & ! concentration of ice
          vicen , & ! volume per unit area of ice          (m)
-         vsnon     ! volume per unit area of snow         (m)
+         vsnon , & ! volume per unit area of snow         (m)
+         old_icen , &
+         old_vicen, &
+         old_vsnon
 
       real (kind=dbl_kind), public, &
          dimension (nx_block,ny_block,max_ntrcr,ncat,max_blocks) :: &
-         trcrn     ! tracers
+         trcrn, &     ! tracers
+         old_trcrn
                    ! 1: surface temperature of ice/snow (C)
 
       !-----------------------------------------------------------------

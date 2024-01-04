@@ -46,6 +46,11 @@
       use ice_timers, only: ice_timer_start, ice_timer_stop, &
           timer_couple, timer_step
       use ice_zbgc_shared, only: skl_bgc
+      use seq_timemgr_mod, only : seq_timemgr_eclockgetdata ! sweid - added below for time update
+
+      logical, save :: do_restart=.true.
+      integer            :: curr_ymd           ! Current date (YYYYMMDD)
+      integer            :: curr_tod           ! Current time of day (s)
 
    !--------------------------------------------------------------------
    !  initialize error code and step timer
@@ -58,6 +63,13 @@
    !--------------------------------------------------------------------
 
 !      timeLoop: do
+      call seq_timemgr_EClockGetData(EClock,               &
+         curr_ymd=curr_ymd, curr_tod=curr_tod)
+      if (mod(curr_tod,21600)==10800 .AND. do_restart) then ! sweid - added for replay
+         istep = istep-6
+         istep1=istep1-6
+         time = time - dt - dt - dt - dt - dt - dt
+      endif
 
          istep  = istep  + 1    ! update time step counters
          istep1 = istep1 + 1
