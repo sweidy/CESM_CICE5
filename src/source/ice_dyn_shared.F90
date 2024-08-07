@@ -101,6 +101,8 @@
          write(nu_diag,*) 'tdamp =', eyc*dt
       endif
 
+      if (allocated(fcor_blk)) deallocate(fcor_blk)  ! added - sweid
+      
       allocate(fcor_blk(nx_block,ny_block,max_blocks))
 
       !$OMP PARALLEL DO PRIVATE(iblk,i,j)

@@ -72,7 +72,7 @@
          aicen , & ! concentration of ice
          vicen , & ! volume per unit area of ice          (m)
          vsnon , & ! volume per unit area of snow         (m)
-         old_icen , &
+         old_aicen , &
          old_vicen, &
          old_vsnon
 

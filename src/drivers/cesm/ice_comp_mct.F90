@@ -35,8 +35,8 @@ module ice_comp_mct
 
   use ice_cpl_indices
   use ice_import_export
-  use ice_state,       !only : aice - sweid (need more)
-  use ice_flux,         ! added - sweid. need for adjust
+  use ice_state       !only : aice - sweid (need more)
+  use ice_flux        ! added - sweid. need for adjust
   use ice_domain_size, only : nx_global, ny_global, block_size_x, block_size_y, max_blocks
   use ice_domain,      only : nblocks, blocks_ice, halo_info, distrb_info
   use ice_blocks,      only : block, get_block, nx_block, ny_block
@@ -243,7 +243,7 @@ contains
     inst_index  = seq_comm_inst(ICEID)
     inst_suffix = seq_comm_suffix(ICEID)
     call t_startf ('cice_init')
-    call cice_init( mpicom_loc )
+    call cice_init( mpicom_loc ) ! TODO: add passed_ymd,passed_tod
     call t_stopf ('cice_init')
 
     call seq_infodata_GetData(infodata, tfreeze_option=tfrz_option )
@@ -505,6 +505,7 @@ contains
 
     real(r8) :: mrss, mrss0,msize,msize0
     logical, save :: first_time = .true.
+    logical, save :: do_restart=.true. ! sweid
 
 !
 ! !REVISION HISTORY:
@@ -561,7 +562,7 @@ contains
     ! timestep update
     !--------------------------------------------------------------------
 
-    call CICE_Run() ! sweid - changed this function
+    call CICE_Run(curr_tod) ! sweid - changed this function
     
     ! add swapping to old variables when replaying - sweid
 
@@ -569,10 +570,11 @@ contains
     curr_ymd=curr_ymd, curr_tod=curr_tod)
 
     if ( mod(curr_tod,21600)==10800 .AND. do_restart) then
+      write(nu_diag,*)'time to swap new for old ice state vars ', curr_tod
       call mct_aVect_zero(x2i_i)
       call mct_aVect_zero(i2x_i)
 
-!      call init_coupler_flux    ! initialize fluxes exchanged with  ! sweid - Ned had this ?
+      call init_coupler_flux    ! initialize fluxes exchanged with  ! sweid - Ned had this ?
 !      call init_thermo_vertical ! initialize vertical thermodynamics
 !      call init_itd             ! initialize ice thickness distribution
 !      call init_state           ! initialize the ice state
@@ -586,8 +588,8 @@ trcrn        =  old_trcrn  ! yes
 aicen        =  old_aicen       ! yes
 !Apondn       =  old_Apondn      ! in ice_meltpond_cesm.F90 but local variable
 Coszen       =  old_Coszen      
-!Eicen        =  old_Eicen       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore
-!Esnon        =  old_Esnon       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore
+!Eicen        =  old_Eicen       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
+!Esnon        =  old_Esnon       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
 !Hpondn       =  old_Hpondn      ! in ice_meltpond_cesm.F90 but local variable
 scale_factor =  old_scale_factor ! yes
 Swidf        =  old_Swidf        ! yes
@@ -607,6 +609,7 @@ nextsw_cday = -1
 endif
 
 if ( mod(curr_tod,21600)==0 .and. .not. do_restart ) then
+   write(nu_diag,*)'time to swap old for new ice state vars ', curr_tod
 
  old_trcrn        =  trcrn
  old_Aicen        =  Aicen

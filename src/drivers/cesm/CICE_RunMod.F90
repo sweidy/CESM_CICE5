@@ -35,7 +35,7 @@
 !         Philip W. Jones, LANL
 !         William H. Lipscomb, LANL
 
-      subroutine CICE_Run
+      subroutine CICE_Run(curr_tod)
 
       use ice_aerosol, only: faero_default
       use ice_algae, only: get_forcing_bgc
@@ -47,10 +47,16 @@
           timer_couple, timer_step
       use ice_zbgc_shared, only: skl_bgc
       use seq_timemgr_mod, only : seq_timemgr_eclockgetdata ! sweid - added below for time update
+      !use esmf, only ESMF_clock
 
+! !ARGUMENTS:
+      type(integer),intent(in), optional  :: curr_tod
+      !type(ESMF_Clock),intent(in)    :: EClock
+
+!     local temporary variables
       logical, save :: do_restart=.true.
-      integer            :: curr_ymd           ! Current date (YYYYMMDD)
-      integer            :: curr_tod           ! Current time of day (s)
+      !integer            :: curr_ymd           ! Current date (YYYYMMDD)
+      !integer            :: curr_tod           ! Current time of day (s)
 
    !--------------------------------------------------------------------
    !  initialize error code and step timer
@@ -63,13 +69,16 @@
    !--------------------------------------------------------------------
 
 !      timeLoop: do
-      call seq_timemgr_EClockGetData(EClock,               &
-         curr_ymd=curr_ymd, curr_tod=curr_tod)
-      if (mod(curr_tod,21600)==10800 .AND. do_restart) then ! sweid - added for replay
+      !call seq_timemgr_EClockGetData(EClock,               & ! sweid - added for replay
+      !curr_ymd=curr_ymd, curr_tod=curr_tod)
+   if (present(curr_tod)) then
+      if (mod(curr_tod,21600)==10800 .AND. do_restart) then 
          istep = istep-6
          istep1=istep1-6
          time = time - dt - dt - dt - dt - dt - dt
+         write(nu_diag,*)'new time (time to restart) ', time
       endif
+   endif
 
          istep  = istep  + 1    ! update time step counters
          istep1 = istep1 + 1
@@ -83,6 +92,7 @@
 #endif
 
 #ifndef coupled
+         write(nu_diag,*)'getting atm / ocean forcing from data'
          call ice_timer_start(timer_couple)  ! atm/ocn coupling
          call get_forcing_atmo     ! atmospheric forcing from data
          call get_forcing_ocn(dt)  ! ocean forcing from data

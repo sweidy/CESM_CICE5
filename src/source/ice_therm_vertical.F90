@@ -302,6 +302,7 @@
                                   Tsf,          einit,        &
                                   Tbot,         l_stop,       &
                                   istop,        jstop)
+      if (l_stop) write(nu_diag,*) 'l_stop after init_vertical_profile'
       if (l_stop) return
 
       do ij = 1, icells
@@ -342,6 +343,7 @@
                                               einit,         l_stop,   &
                                               istop,         jstop)
 
+         if (l_stop) write(nu_diag,*) 'temperature_changes_salinity'
          else ! ktherm
 
             call temperature_changes(nx_block,      ny_block, &
@@ -364,6 +366,8 @@
                                      einit,         l_stop,   &
                                      istop,         jstop)
 
+         if (l_stop) write(nu_diag,*) 'l_stop after temperature_changes'
+
          endif ! ktherm
             
       else
@@ -385,6 +389,7 @@
                                        fcondtopn,     fcondbotn, &
                                        l_stop,                  &
                                        istop,         jstop)
+         if (l_stop) write(nu_diag,*) 'l_stop after zerolayer_temperature'
 
          else
 
@@ -413,6 +418,8 @@
                   einter(ij) = einter(ij) + hilyr(ij) * zqin(ij,k)
                enddo ! k
             enddo ! ij
+      
+      if (l_stop) write(nu_diag,*) 'l_stop after intermedicate energy error check'
 
       if (l_stop) return
  
@@ -471,6 +478,7 @@
                                         fbot,     l_stop,   &
                                         istop,    jstop)
 
+      if (l_stop) write(nu_diag,*) 'l_stop after conservation_check_vthermo'
       if (l_stop) return
 
       !-----------------------------------------------------------------
@@ -2392,9 +2400,10 @@
             istop = i
             jstop = j
 
-         write(nu_diag,*) 'Thermo energy conservation error'
+         write(nu_diag,*) 'Thermo energy conservation error' ! this is where it fails
          write(nu_diag,*) 'istep1, my_task, i, j:', &
                            istep1, my_task, i, j
+         write(nu_diag,*) 'Max allowed flux error (W/m^2) =', ferrmax
          write(nu_diag,*) 'Flux error (W/m^2) =', ferr
          write(nu_diag,*) 'Energy error (J) =', ferr*dt
          write(nu_diag,*) 'Initial energy =', einit(ij)
