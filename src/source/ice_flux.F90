@@ -146,6 +146,7 @@
 
       real (kind=dbl_kind), dimension (nx_block,ny_block,max_blocks), public :: &
          frain   , & ! rainfall rate (kg/m^2 s)
+         old_fsnow , & ! added sweid
          fsnow       ! snowfall rate (kg/m^2 s)
 
       real (kind=dbl_kind), &

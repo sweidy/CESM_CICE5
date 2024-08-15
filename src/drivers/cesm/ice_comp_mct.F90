@@ -574,8 +574,8 @@ contains
       call mct_aVect_zero(x2i_i)
       call mct_aVect_zero(i2x_i)
 
-      call init_coupler_flux    ! initialize fluxes exchanged with  ! sweid - Ned had this ?
-!      call init_thermo_vertical ! initialize vertical thermodynamics
+!      call init_coupler_flux    ! initialize fluxes exchanged with  ! sweid -- commented this to get rid of thermo_vert error 
+!      call init_thermo_vertical ! initialize vertical thermodynamics 
 !      call init_itd             ! initialize ice thickness distribution
 !      call init_state           ! initialize the ice state
 !      call init_transport       ! initialize horizontal transport
@@ -599,6 +599,10 @@ Swvdr        =  old_Swvdr        ! yes
 vicen        =  old_vicen       ! yes
 !Volpn        =  old_Volpn      ! in ice_meltpond_topo (not Ned)
 vsnon        =  old_vsnon       ! yes
+fsnow        =  old_fsnow
+nt_Tsfc      =  old_nt_Tsfc
+nt_apnd      =  old_nt_apnd
+nt_hpnd      =  old_nt_hpnd
 end if
 
 nextsw_cday = -1
@@ -626,6 +630,10 @@ if ( mod(curr_tod,21600)==0 .and. .not. do_restart ) then
  old_Vicen        =  Vicen
 ! old_Volpn        =  Volpn
  old_vsnon        =  vsnon
+ old_fsnow        =  fsnow
+ old_nt_Tsfc      =  nt_Tsfc
+ old_nt_apnd      =  nt_apnd
+ old_nt_hpnd      =  nt_hpnd
 
     do_restart=.TRUE.
 endif
