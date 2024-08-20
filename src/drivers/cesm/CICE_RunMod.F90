@@ -69,11 +69,17 @@
 !      timeLoop: do
       
       if (present(curr_tod)) then ! sweid
-         if (mod(curr_tod,21600)==10800 .AND. do_restart) then 
+         if (mod(curr_tod,21600)==10800 .AND. do_restart) then
+            write(nu_diag,*)'(time to restart) current time: ', curr_tod
             istep = istep-6
             istep1=istep1-6
             time = time - dt - dt - dt - dt - dt - dt
-            write(nu_diag,*)'new time (time to restart) ', time
+            write(nu_diag,*)'new time: ', time
+            do_restart=.FALSE.
+         endif
+         if ( mod(curr_tod,21600)==0 .and. .not. do_restart ) then
+            write(nu_diag,*)'not time to restart: ', curr_tod
+            do_restart=.TRUE.
          endif
       endif
 
