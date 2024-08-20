@@ -35,7 +35,7 @@
 !         Philip W. Jones, LANL
 !         William H. Lipscomb, LANL
 
-      subroutine CICE_Run
+      subroutine CICE_Run(curr_tod)
 
       use ice_aerosol, only: faero_default
       use ice_algae, only: get_forcing_bgc
@@ -46,6 +46,15 @@
       use ice_timers, only: ice_timer_start, ice_timer_stop, &
           timer_couple, timer_step
       use ice_zbgc_shared, only: skl_bgc
+      use seq_timemgr_mod, only : seq_timemgr_eclockgetdata ! sweid - added below for time update
+      !use esmf, only ESMF_clock
+
+! !ARGUMENTS:
+      type(integer),intent(in), optional  :: curr_tod
+      !type(ESMF_Clock),intent(in)    :: EClock
+
+!     local temporary variables
+      logical, save :: do_restart=.true.
 
    !--------------------------------------------------------------------
    !  initialize error code and step timer
@@ -58,6 +67,15 @@
    !--------------------------------------------------------------------
 
 !      timeLoop: do
+      
+      if (present(curr_tod)) then ! sweid
+         if (mod(curr_tod,21600)==10800 .AND. do_restart) then 
+            istep = istep-6
+            istep1=istep1-6
+            time = time - dt - dt - dt - dt - dt - dt
+            write(nu_diag,*)'new time (time to restart) ', time
+         endif
+      endif
 
          istep  = istep  + 1    ! update time step counters
          istep1 = istep1 + 1

@@ -120,10 +120,14 @@
          Tair    , & ! air temperature  (K)
          Qa      , & ! specific humidity (kg/kg)
          rhoa    , & ! air density (kg/m^3)
-         swvdr   , & ! sw down, visible, direct  (W/m^2)
+         swvdr   , & ! sw down, visible, direct  (W/m^2) ! adding old vars here - sweid
+         old_swvdr,&
          swvdf   , & ! sw down, visible, diffuse (W/m^2)
+         old_swvdf,&
          swidr   , & ! sw down, near IR, direct  (W/m^2)
+         old_swidr,&
          swidf   , & ! sw down, near IR, diffuse (W/m^2)
+         old_swidf,&
          flw         ! incoming longwave radiation (W/m^2)
 
        ! in from atmosphere (if .not. Tsfc_calc)
@@ -142,6 +146,7 @@
 
       real (kind=dbl_kind), dimension (nx_block,ny_block,max_blocks), public :: &
          frain   , & ! rainfall rate (kg/m^2 s)
+         old_fsnow , & ! added sweid
          fsnow       ! snowfall rate (kg/m^2 s)
 
       real (kind=dbl_kind), &
@@ -252,7 +257,8 @@
       real (kind=dbl_kind), &
          dimension (nx_block,ny_block,max_blocks), public :: &
          fswfac  , & ! for history
-         scale_factor! scaling factor for shortwave components
+         scale_factor, &! scaling factor for shortwave components
+         old_scale_factor ! added - sweid
 
       logical (kind=log_kind), public :: &
          update_ocn_f, & ! if true, update fresh water and salt fluxes
@@ -353,6 +359,7 @@
          rside   , & ! fraction of ice that melts laterally
          fsw     , & ! incoming shortwave radiation (W/m^2)
          coszen  , & ! cosine solar zenith angle, < 0 for sun below horizon 
+         old_coszen , & ! added - sweid
          rdg_conv, & ! convergence term for ridging (1/s)
          rdg_shear   ! shear term for ridging (1/s)
  

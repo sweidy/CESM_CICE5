@@ -71,11 +71,15 @@
          dimension (nx_block,ny_block,ncat,max_blocks), public :: &
          aicen , & ! concentration of ice
          vicen , & ! volume per unit area of ice          (m)
-         vsnon     ! volume per unit area of snow         (m)
+         vsnon , & ! volume per unit area of snow         (m)
+         old_aicen , &
+         old_vicen, &
+         old_vsnon
 
       real (kind=dbl_kind), public, &
          dimension (nx_block,ny_block,max_ntrcr,ncat,max_blocks) :: &
-         trcrn     ! tracers
+         trcrn, &     ! tracers
+         old_trcrn
                    ! 1: surface temperature of ice/snow (C)
 
       !-----------------------------------------------------------------
@@ -95,6 +99,7 @@
       
       integer (kind=int_kind), public :: &
          nt_Tsfc  , & ! ice/snow temperature
+         old_nt_Tsfc  , & ! added sweid
          nt_qice  , & ! volume-weighted ice enthalpy (in layers)
          nt_qsno  , & ! volume-weighted snow enthalpy (in layers)
          nt_sice  , & ! volume-weighted ice bulk salinity (CICE grid layers)
@@ -104,7 +109,9 @@
          nt_alvl  , & ! level ice area fraction
          nt_vlvl  , & ! level ice volume fraction
          nt_apnd  , & ! melt pond area fraction
+         old_nt_apnd , & ! added sweid
          nt_hpnd  , & ! melt pond depth
+         old_nt_hpnd , & ! added sweid
          nt_ipnd  , & ! melt pond refrozen lid thickness
          nt_aero  , & ! starting index for aerosols in ice
          nt_iso   , & ! starting index for isotopes in ice

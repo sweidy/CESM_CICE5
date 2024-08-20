@@ -35,7 +35,8 @@ module ice_comp_mct
 
   use ice_cpl_indices
   use ice_import_export
-  use ice_state,       only : aice
+  use ice_state       !only : aice - sweid (need more)
+  use ice_flux        ! added - sweid. need for adjust
   use ice_domain_size, only : nx_global, ny_global, block_size_x, block_size_y, max_blocks
   use ice_domain,      only : nblocks, blocks_ice, halo_info, distrb_info
   use ice_blocks,      only : block, get_block, nx_block, ny_block
@@ -504,6 +505,7 @@ contains
 
     real(r8) :: mrss, mrss0,msize,msize0
     logical, save :: first_time = .true.
+    logical, save :: do_restart=.true. ! sweid
 
 !
 ! !REVISION HISTORY:
@@ -560,7 +562,78 @@ contains
     ! timestep update
     !--------------------------------------------------------------------
 
-    call CICE_Run()
+    call CICE_Run(curr_tod) ! sweid - changed this function
+    ! date is changed in the above function
+        
+    ! add swapping to old variables when replaying - sweid
+
+    call seq_timemgr_EClockGetData(EClock,               &
+    curr_ymd=curr_ymd, curr_tod=curr_tod)
+
+    if ( mod(curr_tod,21600)==10800 .AND. do_restart) then
+      write(nu_diag,*)'time to swap new for old ice state vars ', curr_tod
+      call mct_aVect_zero(x2i_i)
+      call mct_aVect_zero(i2x_i)
+
+!      call init_coupler_flux    ! initialize fluxes exchanged with  ! sweid -- commented this to get rid of thermo_vert error 
+!      call init_thermo_vertical ! initialize vertical thermodynamics 
+!      call init_itd             ! initialize ice thickness distribution
+!      call init_state           ! initialize the ice state
+!      call init_transport       ! initialize horizontal transport
+
+if (first_time) then
+    first_time=.FALSE.
+else
+
+trcrn        =  old_trcrn  ! yes     
+aicen        =  old_aicen       ! yes
+!Apondn       =  old_Apondn      ! in ice_meltpond_cesm.F90 but local variable
+Coszen       =  old_Coszen      
+!Eicen        =  old_Eicen       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
+!Esnon        =  old_Esnon       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
+!Hpondn       =  old_Hpondn      ! in ice_meltpond_cesm.F90 but local variable
+scale_factor =  old_scale_factor ! yes
+Swidf        =  old_Swidf        ! yes
+Swidr        =  old_Swidr        ! yes 
+Swvdf        =  old_Swvdf        ! yes
+Swvdr        =  old_Swvdr        ! yes
+vicen        =  old_vicen       ! yes
+!Volpn        =  old_Volpn      ! in ice_meltpond_topo (not Ned)
+vsnon        =  old_vsnon       ! yes
+fsnow        =  old_fsnow
+nt_Tsfc      =  old_nt_Tsfc
+nt_apnd      =  old_nt_apnd
+nt_hpnd      =  old_nt_hpnd
+end if
+
+nextsw_cday = -1
+
+        call init_shortwave
+
+    do_restart=.FALSE.
+endif
+
+if ( mod(curr_tod,21600)==0 .and. .not. do_restart ) then
+   write(nu_diag,*)'time to swap old for new ice state vars ', curr_tod
+
+ ! thermo vars from restart file
+ old_trcrn        =  trcrn
+ old_Aicen        =  Aicen
+ old_Coszen       =  Coszen
+ old_scale_factor =  scale_factor
+ old_Swidf        =  Swidf
+ old_Swidr        =  Swidr
+ old_Swvdf        =  Swvdf
+ old_Swvdr        =  Swvdr
+ old_Vicen        =  Vicen
+ old_vsnon        =  vsnon
+ old_fsnow        =  fsnow
+ old_nt_Tsfc      =  nt_Tsfc
+ old_nt_apnd      =  nt_apnd
+ old_nt_hpnd      =  nt_hpnd
+
+    do_restart=.TRUE.
+endif
 
     !-----------------------------------------------------------------
     ! send export state to driver
@@ -590,8 +663,8 @@ contains
           curr_tod=tod_sync )
        write(nu_diag,*)' cice ymd=',ymd     ,'  cice tod= ',tod
        write(nu_diag,*)' sync ymd=',ymd_sync,'  sync tod= ',tod_sync
-       call shr_sys_abort( SubName// &
-          ":: Internal sea-ice clock not in sync with Sync Clock")
+       !call shr_sys_abort( SubName// &                  ! sweid - commented out alarm
+       !   ":: Internal sea-ice clock not in sync with Sync Clock")
     end if
 
     ! reset shr logging to my original values
@@ -608,6 +681,7 @@ contains
 
     ! Need to stop this at the end of every run phase in a coupled run.
     call ice_timer_stop(timer_total)        ! stop timing
+    call release_all_fileunits ! sweid - added
 
     stop_now = seq_timemgr_StopAlarmIsOn( EClock )
     if (stop_now) then

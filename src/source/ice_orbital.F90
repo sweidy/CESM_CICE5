@@ -94,6 +94,9 @@
          i   , & ! domain longitude index
          j   , & ! domain latitude index
          ij      ! horizontal index, combines i and j loops
+
+      logical, save   :: do_restart=.TRUE. ! added - sweid
+      logical, save   :: switch_restart=.FALSE.
  
  
 ! Solar declination for next time step
@@ -110,6 +113,30 @@
 #else
       ydayp1 = yday + sec/secday
 #endif
+
+      ! replay stuff added - sweid
+      if ( mod(sec,21600)==5400 ) then
+            if ( switch_restart .and. do_restart ) then
+        
+                do_restart=.false.
+                switch_restart=.false.
+            else if ( switch_restart .and. .not. do_restart ) then
+        
+                do_restart=.true.
+                switch_restart=.false.
+            end if
+        endif
+        
+        if ( mod(sec,21600)==0 ) then
+        
+            if ( do_restart ) then
+                ydayp1=nextsw_cday-.125 
+            end if
+            switch_restart=.true.
+        endif
+        ! end added
+
+        ! TODO: the "if (ydayp1 > -0.5_dbl_kind) then" is after the replay stuff in CESM1 (and not just in coupled)
  
       call shr_orb_decl(ydayp1, eccen, mvelpp, lambm0, &
                         obliqr, delta, eccf)
