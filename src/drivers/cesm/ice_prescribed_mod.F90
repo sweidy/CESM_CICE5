@@ -305,6 +305,11 @@ subroutine ice_prescribed_run(mDateIn, secIn)
    ! Interpolate to new ice coverage
    !------------------------------------------------------------------------
 
+   if (my_task == master_task) then
+      write(nu_diag,*) 'ice prescribed run. Date, sec'
+      write(nu_diag,*) mDateIn,secIn 
+   endif 
+
    call shr_strdata_advance(sdat,mDateIn,SecIn,MPI_COMM_ICE,'cice_pice')
 
    ice_cov(:,:,:) = c0  ! This initializes ghost cells as well

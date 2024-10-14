@@ -47,6 +47,7 @@
           timer_couple, timer_step
       use ice_zbgc_shared, only: skl_bgc
       use seq_timemgr_mod, only : seq_timemgr_eclockgetdata ! sweid - added below for time update
+      use ice_communicate, only: MPI_COMM_ICE, my_task, master_task
       !use esmf, only ESMF_clock
 
 ! !ARGUMENTS:
@@ -70,15 +71,15 @@
       
       if (present(curr_tod)) then ! sweid
          if (mod(curr_tod,21600)==10800 .AND. do_restart) then
-            write(nu_diag,*)'(time to restart) current time: ', curr_tod
+            if (my_task == master_task) then
+               print *, 'backing up time by 3 hrs ', curr_tod
+            end if
             istep = istep-6
             istep1=istep1-6
             time = time - dt - dt - dt - dt - dt - dt
-            write(nu_diag,*)'new time: ', time
             do_restart=.FALSE.
          endif
          if ( mod(curr_tod,21600)==0 .and. .not. do_restart ) then
-            write(nu_diag,*)'not time to restart: ', curr_tod
             do_restart=.TRUE.
          endif
       endif

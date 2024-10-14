@@ -571,7 +571,7 @@ contains
     curr_ymd=curr_ymd, curr_tod=curr_tod)
 
     if ( mod(curr_tod,21600)==10800 .AND. do_restart) then
-      write(nu_diag,*)'time to swap new for old ice state vars ', curr_tod
+      
       call mct_aVect_zero(x2i_i)
       call mct_aVect_zero(i2x_i)
 
@@ -585,36 +585,44 @@ if (first_time) then
     first_time=.FALSE.
 else
 
-trcrn        =  old_trcrn  ! yes     
-aicen        =  old_aicen       ! yes
-!Apondn       =  old_Apondn      ! in ice_meltpond_cesm.F90 but local variable
-Coszen       =  old_Coszen      
-!Eicen        =  old_Eicen       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
-!Esnon        =  old_Esnon       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
-!Hpondn       =  old_Hpondn      ! in ice_meltpond_cesm.F90 but local variable
-scale_factor =  old_scale_factor ! yes
-Swidf        =  old_Swidf        ! yes
-Swidr        =  old_Swidr        ! yes 
-Swvdf        =  old_Swvdf        ! yes
-Swvdr        =  old_Swvdr        ! yes
-vicen        =  old_vicen       ! yes
-!Volpn        =  old_Volpn      ! in ice_meltpond_topo (not Ned)
-vsnon        =  old_vsnon       ! yes
-fsnow        =  old_fsnow
-nt_Tsfc      =  old_nt_Tsfc
-nt_apnd      =  old_nt_apnd
-nt_hpnd      =  old_nt_hpnd
-end if
+   if (my_task == master_task) then
+      !write(nu_diag,*)'time to swap new for old ice state vars ', curr_tod
+      print *, 'ice: time to swap new for old ice state vars ', curr_tod
+   end if
 
-nextsw_cday = -1
+   trcrn        =  old_trcrn  ! yes     
+   aicen        =  old_aicen       ! yes
+   !Apondn       =  old_Apondn      ! in ice_meltpond_cesm.F90 but local variable
+   Coszen       =  old_Coszen      
+   !Eicen        =  old_Eicen       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
+   !Esnon        =  old_Esnon       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
+   !Hpondn       =  old_Hpondn      ! in ice_meltpond_cesm.F90 but local variable
+   scale_factor =  old_scale_factor ! yes
+   Swidf        =  old_Swidf        ! yes
+   Swidr        =  old_Swidr        ! yes 
+   Swvdf        =  old_Swvdf        ! yes
+   Swvdr        =  old_Swvdr        ! yes
+   vicen        =  old_vicen       ! yes
+   !Volpn        =  old_Volpn      ! in ice_meltpond_topo (not Ned)
+   vsnon        =  old_vsnon       ! yes
+   fsnow        =  old_fsnow
+   nt_Tsfc      =  old_nt_Tsfc
+   nt_apnd      =  old_nt_apnd
+   nt_hpnd      =  old_nt_hpnd
+end if ! first time
 
-        call init_shortwave
+   nextsw_cday = -1
+   call init_shortwave ! todo: try not this?
 
     do_restart=.FALSE.
-endif
+
+endif ! ( mod(curr_tod,21600)==10800 .AND. do_restart)
 
 if ( mod(curr_tod,21600)==0 .and. .not. do_restart ) then
-   write(nu_diag,*)'time to swap old for new ice state vars ', curr_tod
+   if (my_task == master_task) then
+   !write(nu_diag,*)'time to swap old for new ice state vars ', curr_tod
+      print *, 'time to swap old for new ice state vars ', curr_tod
+   end if
 
  ! thermo vars from restart file
  old_trcrn        =  trcrn
