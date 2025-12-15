@@ -199,6 +199,10 @@
          alidr   , & ! near-ir, direct   (fraction)
          alvdf   , & ! visible, diffuse  (fraction)
          alidf   , & ! near-ir, diffuse  (fraction)
+         ! old_alvdr   , & ! visible, direct   (fraction)
+         ! old_alidr   , & ! near-ir, direct   (fraction)
+         ! old_alvdf   , & ! visible, diffuse  (fraction)
+         ! old_alidf   , & ! near-ir, diffuse  (fraction)
          ! grid-box-mean versions
          alvdr_ai, & ! visible, direct   (fraction)
          alidr_ai, & ! near-ir, direct   (fraction)

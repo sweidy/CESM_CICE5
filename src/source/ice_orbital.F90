@@ -68,6 +68,7 @@
       use ice_calendar, only: yday, sec, calendar_type, nextsw_cday, days_per_year
       use ice_constants, only: c0, c2, p5, pi, secday
       use shr_orb_mod, only: shr_orb_decl
+      use ice_communicate, only: MPI_COMM_ICE, my_task, master_task
 
       integer (kind=int_kind), intent(in) :: &
          nx_block, ny_block, & ! block dimensions
@@ -116,6 +117,11 @@
 
       ! replay stuff added - sweid
       if ( mod(sec,21600)==5400 ) then
+
+            if (my_task == master_task) then
+               print *, 'sec = 5400, switch restart'
+            end if
+
             if ( switch_restart .and. do_restart ) then
         
                 do_restart=.false.
@@ -131,6 +137,9 @@
         
             if ( do_restart ) then
                 ydayp1=nextsw_cday-.125 
+                if (my_task == master_task) then
+                  print *, 'sec = 0, updating ydayp1 ', ydayp1
+                end if
             end if
             switch_restart=.true.
         endif

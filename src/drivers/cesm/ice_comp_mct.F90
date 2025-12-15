@@ -505,7 +505,7 @@ contains
 
     real(r8) :: mrss, mrss0,msize,msize0
     logical, save :: first_time = .true.
-    logical, save :: do_restart=.true. ! sweid
+    logical, save :: do_restart=.false. ! sweid
 
 !
 ! !REVISION HISTORY:
@@ -581,38 +581,42 @@ contains
 !      call init_state           ! initialize the ice state
 !      call init_transport       ! initialize horizontal transport
 
-if (first_time) then
-    first_time=.FALSE.
-else
+      ! if (first_time) then
+      !    first_time=.FALSE.
+      ! else
 
-   if (my_task == master_task) then
-      !write(nu_diag,*)'time to swap new for old ice state vars ', curr_tod
-      print *, 'ice: time to swap new for old ice state vars ', curr_tod
-   end if
+      if (my_task == master_task) then
+         !write(nu_diag,*)'time to swap new for old ice state vars ', curr_tod
+         print *, 'ice: time to swap new for old ice state vars ', curr_tod
+      end if
 
-   trcrn        =  old_trcrn  ! yes     
-   aicen        =  old_aicen       ! yes
-   !Apondn       =  old_Apondn      ! in ice_meltpond_cesm.F90 but local variable
-   Coszen       =  old_Coszen      
-   !Eicen        =  old_Eicen       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
-   !Esnon        =  old_Esnon       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
-   !Hpondn       =  old_Hpondn      ! in ice_meltpond_cesm.F90 but local variable
-   scale_factor =  old_scale_factor ! yes
-   Swidf        =  old_Swidf        ! yes
-   Swidr        =  old_Swidr        ! yes 
-   Swvdf        =  old_Swvdf        ! yes
-   Swvdr        =  old_Swvdr        ! yes
-   vicen        =  old_vicen       ! yes
-   !Volpn        =  old_Volpn      ! in ice_meltpond_topo (not Ned)
-   vsnon        =  old_vsnon       ! yes
-   fsnow        =  old_fsnow
-   nt_Tsfc      =  old_nt_Tsfc
-   nt_apnd      =  old_nt_apnd
-   nt_hpnd      =  old_nt_hpnd
-end if ! first time
+      trcrn        =  old_trcrn  ! yes     
+      aicen        =  old_aicen       ! yes
+      !Apondn       =  old_Apondn      ! in ice_meltpond_cesm.F90 but local variable
+      Coszen       =  old_Coszen      
+      !Eicen        =  old_Eicen       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
+      !Esnon        =  old_Esnon       ! in ice_mechred.F90, ice_itd, ice_therm_itd not therm_vertical anymore (local)
+      !Hpondn       =  old_Hpondn      ! in ice_meltpond_cesm.F90 but local variable
+      scale_factor =  old_scale_factor ! yes
+      Swidf        =  old_Swidf        ! yes
+      Swidr        =  old_Swidr        ! yes 
+      Swvdf        =  old_Swvdf        ! yes
+      Swvdr        =  old_Swvdr        ! yes
+      vicen        =  old_vicen       ! yes
+      !Volpn        =  old_Volpn      ! in ice_meltpond_topo (not Ned)
+      vsnon        =  old_vsnon       ! yes
+      fsnow        =  old_fsnow
+      nt_Tsfc      =  old_nt_Tsfc
+      nt_apnd      =  old_nt_apnd
+      nt_hpnd      =  old_nt_hpnd
+      ! alvdr        =  old_alvdr
+      ! alidr        =  old_alidr
+      ! alvdf        =  old_alvdf
+      ! alidf        =  old_alidf
+   ! end if ! not first time
 
    nextsw_cday = -1
-   call init_shortwave ! todo: try not this?
+   call init_shortwave !
 
     do_restart=.FALSE.
 
@@ -639,6 +643,10 @@ if ( mod(curr_tod,21600)==0 .and. .not. do_restart ) then
  old_nt_Tsfc      =  nt_Tsfc
  old_nt_apnd      =  nt_apnd
  old_nt_hpnd      =  nt_hpnd
+!  old_alvdr        =  alvdr
+!  old_alidr        =  alidr
+!  old_alvdf        =  alvdf
+!  old_alidf        =  alidf
 
     do_restart=.TRUE.
 endif
